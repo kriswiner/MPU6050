@@ -274,7 +274,7 @@ void setup()
 void loop()
 {  
   // If data ready bit set, all data registers have new data
-  if(readByte(MPU6050_ADDRESS, INT_STATUS) && 0x01) {  // check if data ready interrupt
+  if(readByte(MPU6050_ADDRESS, INT_STATUS) & 0x01) {  // check if data ready interrupt
 
     readAccelData(accelCount);  // Read the x/y/z adc values
     getAres();
