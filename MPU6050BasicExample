@@ -258,7 +258,6 @@ void setup()
     delay(1000);
   
     calibrateMPU6050(gyroBias, accelBias); // Calibrate gyro and accelerometers, load biases in bias registers  
-    Serial.println(accelBias[0], 2);  Serial.println(accelBias[1], 2); Serial.println(accelBias[2], 2);
     initMPU6050(); Serial.println("MPU6050 initialized for active data mode...."); // Initialize device for active mode read of acclerometer, gyroscope, and temperature
 
    }
