@@ -208,15 +208,15 @@ void setup()
   pinMode(intPin, INPUT);
   digitalWrite(intPin, LOW);
   
-  display.begin(); // Initialize the display
+  display.begin();         // Initialize the display
   display.setContrast(58); // Set the contrast
-  display.setRotation(2); //  0 or 2) width = width, 1 or 3) width = height, swapped etc.
+  display.setRotation(2);  //  0 or 2) width = width, 1 or 3) width = height, swapped etc.
 
   
 // Start device display with ID of sensor
   display.clearDisplay();
   display.setTextSize(2);
-  display.setCursor(0,0); display.print("MPU6050");
+  display.setCursor(20,0); display.print("MPU6050");
   display.setTextSize(1);
   display.setCursor(0, 20); display.print("6-DOF 16-bit");
   display.setCursor(0, 30); display.print("motion sensor");
@@ -225,9 +225,9 @@ void setup()
   delay(1000);
 
 // Set up for data display
-  display.setTextSize(1); // Set text size to normal, 2 is twice normal etc.
+  display.setTextSize(1);      // Set text size to normal, 2 is twice normal etc.
   display.setTextColor(BLACK); // Set pixel color; 1 on the monochrome screen
-  display.clearDisplay();   // clears the screen and buffer
+  display.clearDisplay();      // clears the screen and buffer
 
   // Read the WHO_AM_I register, this is a good test of communication
   uint8_t c = readByte(MPU6050_ADDRESS, WHO_AM_I_MPU6050);  // Read WHO_AM_I register for MPU-6050
