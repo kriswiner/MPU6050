@@ -40,7 +40,7 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(9, 8, 7, 5, 6);
 // Define registers per MPU6050, Register Map and Descriptions, Rev 4.2, 08/19/2013 6 DOF Motion sensor fusion device
 // Invensense Inc., www.invensense.com
 // See also MPU-6050 Register Map and Descriptions, Revision 4.0, RM-MPU-6050A-00, 9/12/2012 for registers not listed in 
-// above document; the MPU6050 and MPU 6050 are virtually identical but the latter has an on-board magnetic sensor
+// above document; the MPU6050 and MPU-9150 are virtually identical but the latter has an on-board magnetic sensor
 //
 #define XGOFFS_TC        0x00 // Bit 7 PWR_MODE, bits 6:1 XG_OFFS_TC, bit 0 OTP_BNK_VLD                 
 #define YGOFFS_TC        0x01                                                                          
