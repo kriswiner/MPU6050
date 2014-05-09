@@ -305,9 +305,9 @@ void loop()
     Serial.print("Z-acceleration: "); Serial.print(1000*az); Serial.println(" mg"); 
  
     // Print gyro values in degree/sec
-    Serial.print("X-gyro rate: "); Serial.print(gx, 3); Serial.print(" degrees/sec "); 
-    Serial.print("Y-gyro rate: "); Serial.print(gy, 3); Serial.print(" degrees/sec "); 
-    Serial.print("Z-gyro rate: "); Serial.print(gz, 3); Serial.println(" degrees/sec"); 
+    Serial.print("X-gyro rate: "); Serial.print(gx, 1); Serial.print(" degrees/sec "); 
+    Serial.print("Y-gyro rate: "); Serial.print(gy, 1); Serial.print(" degrees/sec "); 
+    Serial.print("Z-gyro rate: "); Serial.print(gz, 1); Serial.println(" degrees/sec"); 
     
    // Print temperature in degrees Centigrade      
     Serial.print("Temperature is ");  Serial.print(temperature, 2);  Serial.println(" degrees C"); // Print T values to tenths of s degree C
@@ -338,7 +338,7 @@ void loop()
 }
 
 //===================================================================================================================
-//====== Set of useful function to access acceleration. gyroscope, magnetometer, and temperature data
+//====== Set of useful function to access acceleration, gyroscope, and temperature data
 //===================================================================================================================
 
 void getGres() {
