@@ -504,12 +504,12 @@ void initMPU6050()
    writeByte(MPU6050_ADDRESS, INT_ENABLE, 0x01);  // Enable data ready (bit 0) interrupt
 }
 
-// Function which accumulates gyro and accelerometer data after device initialization. It calculates the average
+
+// Function which accumulates gyro and accelerometer data before device initialization. It calculates the average
 // of the at-rest readings and then loads the resulting offsets into accelerometer and gyro bias registers.
 void calibrateMPU6050(float * dest1, float * dest2)
 {  
   uint8_t data[12]; // data array to hold accelerometer and gyro x, y, z, data
-  int16_t abias[6], gbias[6];
   uint8_t ii, fifo_count, packet_count;
   int16_t gyro_bias[3]  = {0, 0, 0};
   int16_t accel_bias[3] = {0, 0, 0};
@@ -540,7 +540,7 @@ void calibrateMPU6050(float * dest1, float * dest2)
   writeByte(MPU6050_ADDRESS, ACCEL_CONFIG, 0x00); // Set accelerometer full-scale to 2 g, maximum sensitivity
   delay(200);
  
-  uint16_t  gyrosensitivity  = 131;   // = 131 LSB/degrees/sec
+  uint16_t  gyrosensitivity  = 131;    // = 131 LSB/degrees/sec
   uint16_t  accelsensitivity = 16384;  // = 16384 LSB/g
 
 // Configure FIFO to capture accelerometer and gyro data for bias calculation
@@ -556,36 +556,36 @@ void calibrateMPU6050(float * dest1, float * dest2)
   
   for (ii = 0; ii < packet_count; ii++) {
     readBytes(MPU6050_ADDRESS, FIFO_R_W, 12, data); // read data for averaging
-    accel_bias[0] += (((int16_t)data[0] << 8) | data[1]  ) / packet_count; // Divide sum of FIFO gyro data by number of samples
-    accel_bias[1] += (((int16_t)data[2] << 8) | data[3]  ) / packet_count;
-    accel_bias[2] += (((int16_t)data[4] << 8) | data[5]  ) / packet_count;
-    gyro_bias[0]  += (((int16_t)data[6] << 8) | data[7]  ) / packet_count;
-    gyro_bias[1]  += (((int16_t)data[8] << 8) | data[9]  ) / packet_count;
-    gyro_bias[2]  += (((int16_t)data[10] << 8) | data[11]) / packet_count;
+    accel_bias[0] += (((int16_t)data[0] << 8) | data[1]  ) ; // Divide sum of FIFO gyro data by number of samples
+    accel_bias[1] += (((int16_t)data[2] << 8) | data[3]  ) ;
+    accel_bias[2] += (((int16_t)data[4] << 8) | data[5]  ) - accelsensitivity; // assumes device facing up!
+    gyro_bias[0]  += (((int16_t)data[6] << 8) | data[7]  ) ;
+    gyro_bias[1]  += (((int16_t)data[8] << 8) | data[9]  ) ;
+    gyro_bias[2]  += (((int16_t)data[10] << 8) | data[11]) ;
 }
 
-// Remove gravity from z-axis accelerometer bias value
-  if(accel_bias[2] > 0) {
-    accel_bias[2] -= accelsensitivity; }
-    else { 
-    accel_bias[2] += accelsensitivity; 
-  }
+   accel_bias[0] /= packet_count; // Normalize counts to get average values
+   accel_bias[1] /= packet_count;
+   accel_bias[2] /= packet_count;
+   gyro_bias[0]  /= packet_count;
+   gyro_bias[1]  /= packet_count;
+   gyro_bias[2]  /= packet_count;
 
 // Construct the gyro biases for push to the hardware gyro bias registers, which are reset to zero upon device startup
-  gbias[0] = (-gyro_bias[0]/4  >> 8) & 0xFF; // Divide by 4 to get 32.9 LSB per deg/s to conform to expected bias input format
-  gbias[1] = (-gyro_bias[0]/4)       & 0xFF; // Biases are additive, so change sign on calculated average gyro biases
-  gbias[2] = (-gyro_bias[1]/4  >> 8) & 0xFF;
-  gbias[3] = (-gyro_bias[1]/4)       & 0xFF;
-  gbias[4] = (-gyro_bias[2]/4  >> 8) & 0xFF;
-  gbias[5] = (-gyro_bias[2]/4)       & 0xFF;
+  data[0] = (-gyro_bias[0]/4  >> 8) & 0xFF; // Divide by 4 to get 32.9 LSB per deg/s to conform to expected bias input format
+  data[1] = (-gyro_bias[0]/4)       & 0xFF; // Biases are additive, so change sign on calculated average gyro biases
+  data[2] = (-gyro_bias[1]/4  >> 8) & 0xFF;
+  data[3] = (-gyro_bias[1]/4)       & 0xFF;
+  data[4] = (-gyro_bias[2]/4  >> 8) & 0xFF;
+  data[5] = (-gyro_bias[2]/4)       & 0xFF;
   
 // Push gyro biases to hardware registers
- // writeByte(MPU6050_ADDRESS, XG_OFFS_USRH, gbias[0]); // might not be supported in MPU6050
- // writeByte(MPU6050_ADDRESS, XG_OFFS_USRL, gbias[1]);
- // writeByte(MPU6050_ADDRESS, YG_OFFS_USRH, gbias[2]);
- // writeByte(MPU6050_ADDRESS, YG_OFFS_USRL, gbias[3]);
- // writeByte(MPU6050_ADDRESS, ZG_OFFS_USRH, gbias[4]);
- // writeByte(MPU6050_ADDRESS, ZG_OFFS_USRL, gbias[5]);
+ // writeByte(MPU6050_ADDRESS, XG_OFFS_USRH, data[0]); // might not be supported in MPU6050?
+ // writeByte(MPU6050_ADDRESS, XG_OFFS_USRL, data[1]);
+ // writeByte(MPU6050_ADDRESS, YG_OFFS_USRH, data[2]);
+ // writeByte(MPU6050_ADDRESS, YG_OFFS_USRL, data[3]);
+ // writeByte(MPU6050_ADDRESS, ZG_OFFS_USRH, data[4]);
+ // writeByte(MPU6050_ADDRESS, ZG_OFFS_USRL, data[5]);
  
  dest1[0] = (float) gyro_bias[0]/(float) gyrosensitivity; // construct gyro bias in deg/s for later manual subtraction
  dest1[1] = (float) gyro_bias[1]/(float) gyrosensitivity;
@@ -594,8 +594,8 @@ void calibrateMPU6050(float * dest1, float * dest2)
 // Construct the accelerometer biases for push to the hardware accelerometer bias registers. These registers contain
 // factory trim values which must be added to the calculated accelerometer biases; on boot up these registers will hold
 // non-zero values. In addition, bit 0 of the lower byte must be preserved since it is used for temperature
-// compensation calculations. Accelerometer bias registers expect bias input as 4096 LSB per g, so that
-// the accelerometer biases calculated above must be divided by 4.
+// compensation calculations. Accelerometer bias registers expect bias input as 2048 LSB per g, so that
+// the accelerometer biases calculated above must be divided by 8.
 
   int16_t accel_bias_reg[3] = {0, 0, 0}; // A place to hold the factory accelerometer trim biases
   readBytes(MPU6050_ADDRESS, XA_OFFSET_H, 2, &data[0]); // Read factory accelerometer trim values
@@ -605,7 +605,7 @@ void calibrateMPU6050(float * dest1, float * dest2)
   readBytes(MPU6050_ADDRESS, ZA_OFFSET_H, 2, &data[0]);
   accel_bias_reg[2] = ((int16_t)data[0] << 8) | data[1];
   
-  int32_t mask = 0x0001; // Define mask for temperature compensation bit 0 of lower byte of accelerometer bias registers
+  int16_t mask = 0x0001; // Define mask for temperature compensation bit 0 of lower byte of accelerometer bias registers
   uint8_t mask_bit[3] = {0, 0, 0}; // Define array to hold mask bit for each accelerometer bias axis
   
   for(ii = 0; ii < 3; ii++) {
@@ -617,23 +617,23 @@ void calibrateMPU6050(float * dest1, float * dest2)
   accel_bias_reg[1] -= accel_bias[1]/8;
   accel_bias_reg[2] -= accel_bias[2]/8;
   
-  abias[0] = (accel_bias_reg[0] >> 8) & 0xFF;
-  abias[1] = (accel_bias_reg[0])      & 0xFF;
-  abias[1] = abias[1] | mask_bit[0]; // preserve temperature compensation bit when writing back to accelerometer bias registers
-  abias[2] = (accel_bias_reg[1] >> 8) & 0xFF;
-  abias[3] = (accel_bias_reg[1])      & 0xFF;
-  abias[3] = abias[3] | mask_bit[1]; // preserve temperature compensation bit when writing back to accelerometer bias registers
-  abias[4] = (accel_bias_reg[2] >> 8) & 0xFF;
-  abias[5] = (accel_bias_reg[2])      & 0xFF;
-  abias[5] = abias[5] | mask_bit[2]; // preserve temperature compensation bit when writing back to accelerometer bias registers
+  data[0] = (accel_bias_reg[0] >> 8) & 0xFF;
+  data[1] = (accel_bias_reg[0])      & 0xFF;
+  data[1] = data[1] | mask_bit[0]; // preserve temperature compensation bit when writing back to accelerometer bias registers
+  data[2] = (accel_bias_reg[1] >> 8) & 0xFF;
+  data[3] = (accel_bias_reg[1])      & 0xFF;
+  data[3] = data[3] | mask_bit[1]; // preserve temperature compensation bit when writing back to accelerometer bias registers
+  data[4] = (accel_bias_reg[2] >> 8) & 0xFF;
+  data[5] = (accel_bias_reg[2])      & 0xFF;
+  data[5] = data[5] | mask_bit[2]; // preserve temperature compensation bit when writing back to accelerometer bias registers
  
   // Push accelerometer biases to hardware registers
-//  writeByte(MPU6050_ADDRESS, XA_OFFSET_H, abias[0]); // might not be supported in MPU6050
-//  writeByte(MPU6050_ADDRESS, XA_OFFSET_L_TC, abias[1]);
-//  writeByte(MPU6050_ADDRESS, YA_OFFSET_H, abias[2]);
-//  writeByte(MPU6050_ADDRESS, YA_OFFSET_L_TC, abias[3]);
-//  writeByte(MPU6050_ADDRESS, ZA_OFFSET_H, abias[4]);
-//  writeByte(MPU6050_ADDRESS, ZA_OFFSET_L_TC, abias[5]);
+//  writeByte(MPU6050_ADDRESS, XA_OFFSET_H, data[0]); // might not be supported in MPU6050?
+//  writeByte(MPU6050_ADDRESS, XA_OFFSET_L_TC, data[1]);
+//  writeByte(MPU6050_ADDRESS, YA_OFFSET_H, data[2]);
+//  writeByte(MPU6050_ADDRESS, YA_OFFSET_L_TC, data[3]);
+//  writeByte(MPU6050_ADDRESS, ZA_OFFSET_H, data[4]);
+//  writeByte(MPU6050_ADDRESS, ZA_OFFSET_L_TC, data[5]);
 
 // Output scaled accelerometer biases for manual subtraction in the main program
     dest2[0] = (float)accel_bias[0]/(float)accelsensitivity; 
