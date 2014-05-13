@@ -317,7 +317,7 @@ void loop()
       beta = 0.04;  // decrease filter gain after stabilized
       zeta = 0.015; // increaseyro bias drift gain after stabilized
     }
-   // Pass gyro rate as rad/s
+    // Pass gyro rate as rad/s
     MadgwickQuaternionUpdate(ax, ay, az, gx*PI/180.0f, gy*PI/180.0f, gz*PI/180.0f);
 
     // Serial print and/or display at 0.5 s rate independent of data rates
@@ -534,10 +534,11 @@ void initMPU6050()
  // Configure Gyro and Accelerometer
  // Disable FSYNC and set accelerometer and gyro bandwidth to 44 and 42 Hz, respectively; 
  // DLPF_CFG = bits 2:0 = 010; this sets the sample rate at 1 kHz for both
-  writeByte(MPU6050_ADDRESS, CONFIG, 0x02);  
+ // Maximum delay is 4.9 ms so effective sample rate is just above 200 Hz
+  writeByte(MPU6050_ADDRESS, CONFIG, 0x03);  
  
  // Set sample rate = gyroscope output rate/(1 + SMPLRT_DIV)
-  writeByte(MPU6050_ADDRESS, SMPLRT_DIV, 0x09);  // Use a 100 Hz rate; the same rate set in CONFIG above
+  writeByte(MPU6050_ADDRESS, SMPLRT_DIV, 0x04);  // Use a 200 Hz rate; the same rate set in CONFIG above
  
  // Set gyroscope full scale range
  // Range selects FS_SEL and AFS_SEL are 0 - 3, so 2-bit values are left-shifted into positions 4:3
