@@ -277,7 +277,7 @@ void setup()
     calibrateMPU6050(gyroBias, accelBias); // Calibrate gyro and accelerometers, load biases in bias registers  
   display.clearDisplay();
      
-  display.setCursor(0, 0); display.print("MPU9150 bias");
+  display.setCursor(20, 0); display.print("MPU6050 bias");
   display.setCursor(0, 8); display.print(" x   y   z  ");
 
   display.setCursor(0,  16); display.print((int)(1000*accelBias[0])); 
