@@ -204,13 +204,13 @@ uint32_t delt_t = 0; // used to control display output rate
 uint32_t count = 0;  // used to control display output rate
 
 // parameters for 6 DoF sensor fusion calculations
-float GyroMeasError = PI * (60.0f / 180.0f);     // gyroscope measurement error in rads/s (start at 60 deg/s), then reduce after ~10 s to 3
+float GyroMeasError = PI * (40.0f / 180.0f);     // gyroscope measurement error in rads/s (start at 60 deg/s), then reduce after ~10 s to 3
 float beta = sqrt(3.0f / 4.0f) * GyroMeasError;  // compute beta
-float GyroMeasDrift = PI * (0.0f / 180.0f);      // gyroscope measurement drift in rad/s/s (start at 0.0 deg/s/s)
+float GyroMeasDrift = PI * (2.0f / 180.0f);      // gyroscope measurement drift in rad/s/s (start at 0.0 deg/s/s)
 float zeta = sqrt(3.0f / 4.0f) * GyroMeasDrift;  // compute zeta, the other free parameter in the Madgwick scheme usually set to a small or zero value
 float pitch, yaw, roll;
 float deltat = 0.0f;                              // integration interval for both filter schemes
-uint32_t lastUpdate = 0, firstUpdate = 0;                          // used to calculate integration interval
+uint32_t lastUpdate = 0, firstUpdate = 0;         // used to calculate integration interval
 uint32_t Now = 0;                                 // used to calculate integration interval
 float q[4] = {1.0f, 0.0f, 0.0f, 0.0f};            // vector to hold quaternion
 
@@ -275,7 +275,25 @@ void setup()
     delay(1000);
   
     calibrateMPU6050(gyroBias, accelBias); // Calibrate gyro and accelerometers, load biases in bias registers  
-    initMPU6050(); Serial.println("MPU6050 initialized for active data mode...."); // Initialize device for active mode read of acclerometer, gyroscope, and temperature
+  display.clearDisplay();
+     
+  display.setCursor(0, 0); display.print("MPU9150 bias");
+  display.setCursor(0, 8); display.print(" x   y   z  ");
+
+  display.setCursor(0,  16); display.print((int)(1000*accelBias[0])); 
+  display.setCursor(24, 16); display.print((int)(1000*accelBias[1])); 
+  display.setCursor(48, 16); display.print((int)(1000*accelBias[2])); 
+  display.setCursor(72, 16); display.print("mg");
+    
+  display.setCursor(0,  24); display.print(gyroBias[0], 1); 
+  display.setCursor(24, 24); display.print(gyroBias[1], 1); 
+  display.setCursor(48, 24); display.print(gyroBias[2], 1); 
+  display.setCursor(66, 24); display.print("o/s");   
+ 
+  display.display();
+  delay(1000); 
+    
+   initMPU6050(); Serial.println("MPU6050 initialized for active data mode...."); // Initialize device for active mode read of acclerometer, gyroscope, and temperature
    }
    else
    {
@@ -294,17 +312,17 @@ void loop()
     getAres();
     
     // Now we'll calculate the accleration value into actual g's
-    ax = (float)accelCount[0]*aRes - accelBias[0];  // get actual g value, this depends on scale being set
-    ay = (float)accelCount[1]*aRes - accelBias[1];   
-    az = (float)accelCount[2]*aRes - accelBias[2];  
+    ax = (float)accelCount[0]*aRes;  // get actual g value, this depends on scale being set
+    ay = (float)accelCount[1]*aRes;   
+    az = (float)accelCount[2]*aRes;  
    
     readGyroData(gyroCount);  // Read the x/y/z adc values
     getGres();
  
     // Calculate the gyro value into actual degrees per second
-    gx = (float)gyroCount[0]*gRes - gyroBias[0];  // get actual gyro value, this depends on scale being set
-    gy = (float)gyroCount[1]*gRes - gyroBias[1];  
-    gz = (float)gyroCount[2]*gRes - gyroBias[2];   
+    gx = (float)gyroCount[0]*gRes;  // get actual gyro value, this depends on scale being set
+    gy = (float)gyroCount[1]*gRes;  
+    gz = (float)gyroCount[2]*gRes;   
 
     tempCount = readTempData();  // Read the x/y/z adc values
     temperature = ((float) tempCount) / 340. + 36.53; // Temperature in degrees Centigrade
@@ -313,10 +331,10 @@ void loop()
     Now = micros();
     deltat = ((Now - lastUpdate)/1000000.0f); // set integration time by time elapsed since last filter update
     lastUpdate = Now;
-    if(lastUpdate - firstUpdate > 10000000.0f) {
-      beta = 0.041;  // decrease filter gain after stabilized
-      zeta = 0.015; // increase gyro bias drift gain after stabilized
-    }
+//    if(lastUpdate - firstUpdate > 10000000uL) {
+//      beta = 0.041; // decrease filter gain after stabilized
+//      zeta = 0.015; // increase gyro bias drift gain after stabilized
+//    }
    // Pass gyro rate as rad/s
     MadgwickQuaternionUpdate(ax, ay, az, gx*PI/180.0f, gy*PI/180.0f, gz*PI/180.0f);
 
@@ -324,7 +342,7 @@ void loop()
     delt_t = millis() - count;
     if (delt_t > 500) { // update LCD once per half-second independent of read rate
     digitalWrite(blinkPin, blinkOn);
- 
+/* 
     Serial.print("ax = "); Serial.print((int)1000*ax);  
     Serial.print(" ay = "); Serial.print((int)1000*ay); 
     Serial.print(" az = "); Serial.print((int)1000*az); Serial.println(" mg");
@@ -337,7 +355,7 @@ void loop()
     Serial.print(" qx = "); Serial.print(q[1]); 
     Serial.print(" qy = "); Serial.print(q[2]); 
     Serial.print(" qz = "); Serial.println(q[3]);          
-    
+*/    
   // Define output variables from updated quaternion---these are Tait-Bryan angles, commonly used in aircraft orientation.
   // In this coordinate system, the positive z-axis is down toward Earth. 
   // Yaw is the angle between Sensor x-axis and Earth magnetic North (or true North if corrected for local declination, looking down on the sensor positive yaw is counterclockwise.
@@ -354,14 +372,14 @@ void loop()
     yaw   *= 180.0f / PI; 
     roll  *= 180.0f / PI;
 
-    Serial.print("Yaw, Pitch, Roll: ");
+//    Serial.print("Yaw, Pitch, Roll: ");
     Serial.print(yaw, 2);
     Serial.print(", ");
     Serial.print(pitch, 2);
     Serial.print(", ");
     Serial.println(roll, 2);
 
-    Serial.print("average rate = "); Serial.print(1.0f/deltat, 2); Serial.println(" Hz");
+//    Serial.print("average rate = "); Serial.print(1.0f/deltat, 2); Serial.println(" Hz");
     
     display.clearDisplay();
       
@@ -519,11 +537,6 @@ void LowPowerAccelOnlyMPU6050()
 
 void initMPU6050()
 {  
- // Initialize MPU6050 device
- // reset device
-  writeByte(MPU6050_ADDRESS, PWR_MGMT_1, 0x80); // Write a one to bit 7 reset bit; toggle reset device
-  delay(100);
-   
  // wake up device
   writeByte(MPU6050_ADDRESS, PWR_MGMT_1, 0x00); // Clear sleep mode bit (6), enable all sensors 
   delay(100); // Delay 100 ms for PLL to get established on x-axis gyro; should check for PLL ready interrupt  
@@ -644,12 +657,12 @@ void calibrateMPU6050(float * dest1, float * dest2)
   data[5] = (-gyro_bias[2]/4)       & 0xFF;
 
 // Push gyro biases to hardware registers
-//  writeByte(MPU6050_ADDRESS, XG_OFFS_USRH, data[0]); // might not be supported in MPU6050
-//  writeByte(MPU6050_ADDRESS, XG_OFFS_USRL, data[1]);
-//  writeByte(MPU6050_ADDRESS, YG_OFFS_USRH, data[2]);
-//  writeByte(MPU6050_ADDRESS, YG_OFFS_USRL, data[3]);
-//  writeByte(MPU6050_ADDRESS, ZG_OFFS_USRH, data[4]);
-//  writeByte(MPU6050_ADDRESS, ZG_OFFS_USRL, data[5]);
+  writeByte(MPU6050_ADDRESS, XG_OFFS_USRH, data[0]);// might not be supported in MPU6050
+  writeByte(MPU6050_ADDRESS, XG_OFFS_USRL, data[1]);
+  writeByte(MPU6050_ADDRESS, YG_OFFS_USRH, data[2]);
+  writeByte(MPU6050_ADDRESS, YG_OFFS_USRL, data[3]);
+  writeByte(MPU6050_ADDRESS, ZG_OFFS_USRH, data[4]);
+  writeByte(MPU6050_ADDRESS, ZG_OFFS_USRL, data[5]);
 
   dest1[0] = (float) gyro_bias[0]/(float) gyrosensitivity; // construct gyro bias in deg/s for later manual subtraction
   dest1[1] = (float) gyro_bias[1]/(float) gyrosensitivity;
@@ -661,15 +674,15 @@ void calibrateMPU6050(float * dest1, float * dest2)
 // compensation calculations. Accelerometer bias registers expect bias input as 2048 LSB per g, so that
 // the accelerometer biases calculated above must be divided by 8.
 
-  int16_t accel_bias_reg[3] = {0, 0, 0}; // A place to hold the factory accelerometer trim biases
+  int32_t accel_bias_reg[3] = {0, 0, 0}; // A place to hold the factory accelerometer trim biases
   readBytes(MPU6050_ADDRESS, XA_OFFSET_H, 2, &data[0]); // Read factory accelerometer trim values
-  accel_bias_reg[0] = ((int16_t)data[0] << 8) | data[1];
+  accel_bias_reg[0] = (int16_t) ((int16_t)data[0] << 8) | data[1];
   readBytes(MPU6050_ADDRESS, YA_OFFSET_H, 2, &data[0]);
-  accel_bias_reg[1] = ((int16_t)data[0] << 8) | data[1];
+  accel_bias_reg[1] = (int16_t) ((int16_t)data[0] << 8) | data[1];
   readBytes(MPU6050_ADDRESS, ZA_OFFSET_H, 2, &data[0]);
-  accel_bias_reg[2] = ((int16_t)data[0] << 8) | data[1];
+  accel_bias_reg[2] = (int16_t) ((int16_t)data[0] << 8) | data[1];
   
-  uint16_t mask = 0x0001; // Define mask for temperature compensation bit 0 of lower byte of accelerometer bias registers
+  uint32_t mask = 1uL; // Define mask for temperature compensation bit 0 of lower byte of accelerometer bias registers
   uint8_t mask_bit[3] = {0, 0, 0}; // Define array to hold mask bit for each accelerometer bias axis
   
   for(ii = 0; ii < 3; ii++) {
@@ -677,9 +690,9 @@ void calibrateMPU6050(float * dest1, float * dest2)
   }
 
   // Construct total accelerometer bias, including calculated average accelerometer bias from above
-  accel_bias_reg[0] -= (int16_t) (accel_bias[0]/8); // Subtract calculated averaged accelerometer bias scaled to 2048 LSB/g (16 g full scale)
-  accel_bias_reg[1] -= (int16_t) (accel_bias[1]/8);
-  accel_bias_reg[2] -= (int16_t) (accel_bias[2]/8);
+  accel_bias_reg[0] -= (accel_bias[0]/8); // Subtract calculated averaged accelerometer bias scaled to 2048 LSB/g (16 g full scale)
+  accel_bias_reg[1] -= (accel_bias[1]/8);
+  accel_bias_reg[2] -= (accel_bias[2]/8);
  
   data[0] = (accel_bias_reg[0] >> 8) & 0xFF;
   data[1] = (accel_bias_reg[0])      & 0xFF;
@@ -692,11 +705,12 @@ void calibrateMPU6050(float * dest1, float * dest2)
   data[5] = data[5] | mask_bit[2]; // preserve temperature compensation bit when writing back to accelerometer bias registers
 
   // Push accelerometer biases to hardware registers
-//  writeByte(MPU6050_ADDRESS, XA_OFFSET_H, data[0]); // might not be supported in MPU6050
-//  writeByte(MPU6050_ADDRESS, XA_OFFSET_L_TC, data[1]);
-//  writeByte(MPU6050_ADDRESS, YA_OFFSET_H, data[2]);
-//  writeByte(MPU6050_ADDRESS, YA_OFFSET_L_TC, data[3])////  writeByte(MPU6050_ADDRESS, ZA_OFFSET_H, data[4]);
-//  writeByte(MPU6050_ADDRESS, ZA_OFFSET_L_TC, data[5]);
+  writeByte(MPU6050_ADDRESS, XA_OFFSET_H, data[0]); // might not be supported in MPU6050
+  writeByte(MPU6050_ADDRESS, XA_OFFSET_L_TC, data[1]);
+  writeByte(MPU6050_ADDRESS, YA_OFFSET_H, data[2]);
+  writeByte(MPU6050_ADDRESS, YA_OFFSET_L_TC, data[3]);  
+  writeByte(MPU6050_ADDRESS, ZA_OFFSET_H, data[4]);
+  writeByte(MPU6050_ADDRESS, ZA_OFFSET_L_TC, data[5]);
 
 // Output scaled accelerometer biases for manual subtraction in the main program
    dest2[0] = (float)accel_bias[0]/(float)accelsensitivity; 
