@@ -465,10 +465,6 @@ void LowPowerAccelOnlyMPU6050()
 void initMPU6050()
 {  
  // Initialize MPU6050 device
- // reset device
-  writeByte(MPU6050_ADDRESS, PWR_MGMT_1, 0x80); // Write a one to bit 7 reset bit; toggle reset device
-  delay(100);
-   
  // wake up device
   writeByte(MPU6050_ADDRESS, PWR_MGMT_1, 0x00); // Clear sleep mode bit (6), enable all sensors 
   delay(100); // Delay 100 ms for PLL to get established on x-axis gyro; should check for PLL ready interrupt  
