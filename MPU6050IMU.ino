@@ -537,9 +537,9 @@ void LowPowerAccelOnlyMPU6050()
 
 void initMPU6050()
 {  
- // wake up device
-  writeByte(MPU6050_ADDRESS, PWR_MGMT_1, 0x00); // Clear sleep mode bit (6), enable all sensors 
-  delay(100); // Delay 100 ms for PLL to get established on x-axis gyro; should check for PLL ready interrupt  
+// wake up device-don't need this here if using calibration function below
+//  writeByte(MPU6050_ADDRESS, PWR_MGMT_1, 0x00); // Clear sleep mode bit (6), enable all sensors 
+//  delay(100); // Delay 100 ms for PLL to get established on x-axis gyro; should check for PLL ready interrupt  
 
  // get stable time source
   writeByte(MPU6050_ADDRESS, PWR_MGMT_1, 0x01);  // Set clock source to be PLL with x-axis gyroscope reference, bits 2:0 = 001
