@@ -11,7 +11,7 @@ STM32F401. I am designing portable motion sensing and control devices and have p
 are not up to the task. I am currently targeting the Teensy 3.1 ARM M4 Cortex device since it is essentially a commodity 
 available at $17 each from OSHPark.com, open-source, and, I believe, amenable to modular re-configuration by addition of 
 small boards to get me the motion sensing, BLE commo, battery charging, and motor control functions I want in a very small
-total package. However, i am exploring the use of the STM32F401 family also since it is inexpensive, as capable if not
+total package. However, I am exploring the use of the STM32F401 family also since it is inexpensive, as capable if not
 more so than the Teensy 3.1 ARM processor, and can operate at extremely low power, which is essential for a portable
 device.
 
