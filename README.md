@@ -5,7 +5,7 @@ Basic MPU-6050 Arduino sketch of sensor function
 
 For a discussion of performance on various microcontroller platforms, uses and limitations of the MPU-6050 see ![here.] (https://github.com/kriswiner/MPU-6050/wiki/Affordable-9-DoF-Sensor-Fusion)
 
-I have written a report from the recent ![Invensense Developers Conference.](https://github.com/kriswiner/MPU-6050/wiki/2014-Invensense-Developer%27s-Conference)
+I have written a report from the June 11-12, 2014 ![Invensense Developers Conference.](https://github.com/kriswiner/MPU-6050/wiki/2014-Invensense-Developer%27s-Conference)
 
 This sketch demonstrates  MPU-6050 basic functionality including initialization, accelerometer and gyro calibration, sleep mode functionality as well as parameterizing the register addresses. Added display functions to allow display to on-breadboard monitor. 
 No DMP use. We just want to get out the accelerations, temperature, and gyro readings.
