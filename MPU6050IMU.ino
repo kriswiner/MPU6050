@@ -166,6 +166,11 @@ Adafruit_PCD8544 display = Adafruit_PCD8544(9, 8, 7, 5, 6);
 #define MPU6050_ADDRESS 0x68  // Device address when ADO = 0
 #endif
 
+volatile bool mpuInterrupt = false;
+void mpuDataReady() {
+  mpuInterrupt = true;
+}
+
 // Set initial input parameters
 enum Ascale {
   AFS_2G = 0,
@@ -220,8 +225,7 @@ void setup()
   Serial.begin(38400);
   
   // Set up the interrupt pin, its set as active high, push-pull
-  pinMode(intPin, INPUT);
-  digitalWrite(intPin, LOW);
+  attachInterrupt(intPin, mpuDataReady, RISING);
   pinMode(blinkPin, OUTPUT);
   digitalWrite(blinkPin, HIGH);
   
@@ -304,10 +308,10 @@ void setup()
   }
 }
 
-void loop()
-{  
-   // If data ready bit set, all data registers have new data
-  if(readByte(MPU6050_ADDRESS, INT_STATUS) & 0x01) {  // check if data ready interrupt
+void loop() {
+    while (!mpuInterrupt) {
+        // other program behaviour here
+    }
     readAccelData(accelCount);  // Read the x/y/z adc values
     getAres();
     
@@ -326,7 +330,7 @@ void loop()
 
     tempCount = readTempData();  // Read the x/y/z adc values
     temperature = ((float) tempCount) / 340. + 36.53; // Temperature in degrees Centigrade
-   }  
+
    
     Now = micros();
     deltat = ((Now - lastUpdate)/1000000.0f); // set integration time by time elapsed since last filter update
@@ -405,8 +409,8 @@ void loop()
     
     blinkOn = ~blinkOn;
     count = millis();  
+    }
 }
-  }
 
 //===================================================================================================================
 //====== Set of useful function to access acceleratio, gyroscope, and temperature data
