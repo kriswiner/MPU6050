@@ -194,7 +194,7 @@ boolean blinkOn = false;
 int16_t accelCount[3];  // Stores the 16-bit signed accelerometer sensor output
 float ax, ay, az;       // Stores the real accel value in g's
 int16_t gyroCount[3];   // Stores the 16-bit signed gyro sensor output
-float gx, gy, gz;       // Stores the real gyro value in degrees per seconds
+float gyrox, gyroy, gyroz;       // Stores the real gyro value in degrees per seconds
 float gyroBias[3] = {0, 0, 0}, accelBias[3] = {0, 0, 0}; // Bias corrections for gyro and accelerometer
 int16_t tempCount;   // Stores the real internal chip temperature in degrees Celsius
 float temperature;
@@ -320,9 +320,9 @@ void loop()
     getGres();
  
     // Calculate the gyro value into actual degrees per second
-    gx = (float)gyroCount[0]*gRes;  // get actual gyro value, this depends on scale being set
-    gy = (float)gyroCount[1]*gRes;  
-    gz = (float)gyroCount[2]*gRes;   
+    gyrox = (float)gyroCount[0]*gRes;  // get actual gyro value, this depends on scale being set
+    gyroy = (float)gyroCount[1]*gRes;  
+    gyroz = (float)gyroCount[2]*gRes;   
 
     tempCount = readTempData();  // Read the x/y/z adc values
     temperature = ((float) tempCount) / 340. + 36.53; // Temperature in degrees Centigrade
@@ -336,7 +336,7 @@ void loop()
 //      zeta = 0.015; // increase gyro bias drift gain after stabilized
 //    }
    // Pass gyro rate as rad/s
-    MadgwickQuaternionUpdate(ax, ay, az, gx*PI/180.0f, gy*PI/180.0f, gz*PI/180.0f);
+    MadgwickQuaternionUpdate(ax, ay, az, gyrox*PI/180.0f, gyroy*PI/180.0f, gyroz*PI/180.0f);
 
     // Serial print and/or display at 0.5 s rate independent of data rates
     delt_t = millis() - count;
@@ -347,9 +347,9 @@ void loop()
     Serial.print(" ay = "); Serial.print((int)1000*ay); 
     Serial.print(" az = "); Serial.print((int)1000*az); Serial.println(" mg");
 
-    Serial.print("gx = "); Serial.print( gx, 1); 
-    Serial.print(" gy = "); Serial.print( gy, 1); 
-    Serial.print(" gz = "); Serial.print( gz, 1); Serial.println(" deg/s");
+    Serial.print("gyrox = "); Serial.print( gyrox, 1); 
+    Serial.print(" gyroy = "); Serial.print( gyroy, 1); 
+    Serial.print(" gyroz = "); Serial.print( gyroz, 1); Serial.println(" deg/s");
     
     Serial.print("q0 = "); Serial.print(q[0]);
     Serial.print(" qx = "); Serial.print(q[1]); 
@@ -390,9 +390,9 @@ void loop()
     display.setCursor(48, 8); display.print((int)(1000*az)); 
     display.setCursor(72, 8); display.print("mg");
     
-    display.setCursor(0,  16); display.print((int)(gx)); 
-    display.setCursor(24, 16); display.print((int)(gy)); 
-    display.setCursor(48, 16); display.print((int)(gz)); 
+    display.setCursor(0,  16); display.print((int)(gyrox)); 
+    display.setCursor(24, 16); display.print((int)(gyroy)); 
+    display.setCursor(48, 16); display.print((int)(gyroz)); 
     display.setCursor(66, 16); display.print("o/s");    
  
     display.setCursor(0,  32); display.print((int)(yaw)); 

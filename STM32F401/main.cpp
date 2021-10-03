@@ -137,9 +137,9 @@ int main()
     mpu6050.getGres();
  
     // Calculate the gyro value into actual degrees per second
-    gx = (float)gyroCount[0]*gRes; // - gyroBias[0];  // get actual gyro value, this depends on scale being set
-    gy = (float)gyroCount[1]*gRes; // - gyroBias[1];  
-    gz = (float)gyroCount[2]*gRes; // - gyroBias[2];   
+    gyrox = (float)gyroCount[0]*gRes; // - gyroBias[0];  // get actual gyro value, this depends on scale being set
+    gyroy = (float)gyroCount[1]*gRes; // - gyroBias[1];  
+    gyroz = (float)gyroCount[2]*gRes; // - gyroBias[2];   
 
     tempCount = mpu6050.readTempData();  // Read the x/y/z adc values
     temperature = (tempCount) / 340. + 36.53; // Temperature in degrees Centigrade
@@ -158,7 +158,7 @@ int main()
     }
     
    // Pass gyro rate as rad/s
-    mpu6050.MadgwickQuaternionUpdate(ax, ay, az, gx*PI/180.0f, gy*PI/180.0f, gz*PI/180.0f);
+    mpu6050.MadgwickQuaternionUpdate(ax, ay, az, gyrox*PI/180.0f, gyroy*PI/180.0f, gyroz*PI/180.0f);
 
     // Serial print and/or display at 0.5 s rate independent of data rates
     delt_t = t.read_ms() - count;
@@ -168,9 +168,9 @@ int main()
     pc.printf(" ay = %f", 1000*ay); 
     pc.printf(" az = %f  mg\n\r", 1000*az); 
 
-    pc.printf("gx = %f", gx); 
-    pc.printf(" gy = %f", gy); 
-    pc.printf(" gz = %f  deg/s\n\r", gz); 
+    pc.printf("gyrox = %f", gyrox); 
+    pc.printf(" gyroy = %f", gyroy); 
+    pc.printf(" gyroz = %f  deg/s\n\r", gyroz); 
     
     pc.printf(" temperature = %f  C\n\r", temperature); 
     

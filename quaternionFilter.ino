@@ -4,7 +4,7 @@
 // device orientation -- which can be converted to yaw, pitch, and roll. Useful for stabilizing quadcopters, etc.
 // The performance of the orientation filter is at least as good as conventional Kalman-based filtering algorithms
 // but is much less computationally intensive---it can be performed on a 3.3 V Pro Mini operating at 8 MHz!
-        void MadgwickQuaternionUpdate(float ax, float ay, float az, float gx, float gy, float gz)
+        void MadgwickQuaternionUpdate(float ax, float ay, float az, float gyrox, float gyroy, float gyroz)
         {
             float q1 = q[0], q2 = q[1], q3 = q[2], q4 = q[3];         // short name local variable for readability
             float norm;                                               // vector norm
@@ -67,15 +67,15 @@
             gbiasx += gerrx * deltat * zeta;
             gbiasy += gerry * deltat * zeta;
             gbiasz += gerrz * deltat * zeta;
-            gx -= gbiasx;
-            gy -= gbiasy;
-            gz -= gbiasz;
+            gyrox -= gbiasx;
+            gyroy -= gbiasy;
+            gyroz -= gbiasz;
             
             // Compute the quaternion derivative
-            qDot1 = -_halfq2 * gx - _halfq3 * gy - _halfq4 * gz;
-            qDot2 =  _halfq1 * gx + _halfq3 * gz - _halfq4 * gy;
-            qDot3 =  _halfq1 * gy - _halfq2 * gz + _halfq4 * gx;
-            qDot4 =  _halfq1 * gz + _halfq2 * gy - _halfq3 * gx;
+            qDot1 = -_halfq2 * gyrox - _halfq3 * gyroy - _halfq4 * gyroz;
+            qDot2 =  _halfq1 * gyrox + _halfq3 * gyroz - _halfq4 * gyroy;
+            qDot3 =  _halfq1 * gyroy - _halfq2 * gyroz + _halfq4 * gyrox;
+            qDot4 =  _halfq1 * gyroz + _halfq2 * gyroy - _halfq3 * gyrox;
 
             // Compute then integrate estimated quaternion derivative
             q1 += (qDot1 -(beta * hatDot1)) * deltat;
