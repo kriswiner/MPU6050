@@ -192,7 +192,7 @@ int intPin = 12;  // This can be changed, 2 and 3 are the Arduinos ext int pins
 int16_t accelCount[3];           // Stores the 16-bit signed accelerometer sensor output
 float ax, ay, az;                // Stores the real accel value in g's
 int16_t gyroCount[3];            // Stores the 16-bit signed gyro sensor output
-float gx, gy, gz;                // Stores the real gyro value in degrees per seconds
+float gyrox, gyroy, gyroz;                // Stores the real gyro value in degrees per seconds
 float gyroBias[3], accelBias[3]; // Bias corrections for gyro and accelerometer
 int16_t tempCount;               // Stores the internal chip temperature sensor output 
 float temperature;               // Scaled temperature in degrees Celsius
@@ -288,9 +288,9 @@ void loop()
     getGres();
  
     // Calculate the gyro value into actual degrees per second
-    gx = (float)gyroCount[0]*gRes - gyroBias[0];  // get actual gyro value, this depends on scale being set
-    gy = (float)gyroCount[1]*gRes - gyroBias[1];  
-    gz = (float)gyroCount[2]*gRes - gyroBias[2];   
+    gyrox = (float)gyroCount[0]*gRes - gyroBias[0];  // get actual gyro value, this depends on scale being set
+    gyroy = (float)gyroCount[1]*gRes - gyroBias[1];  
+    gyroz = (float)gyroCount[2]*gRes - gyroBias[2];   
 
     tempCount = readTempData();  // Read the x/y/z adc values
     temperature = ((float) tempCount) / 340. + 36.53; // Temperature in degrees Centigrade
@@ -305,9 +305,9 @@ void loop()
     Serial.print("Z-acceleration: "); Serial.print(1000*az); Serial.println(" mg"); 
  
     // Print gyro values in degree/sec
-    Serial.print("X-gyro rate: "); Serial.print(gx, 1); Serial.print(" degrees/sec "); 
-    Serial.print("Y-gyro rate: "); Serial.print(gy, 1); Serial.print(" degrees/sec "); 
-    Serial.print("Z-gyro rate: "); Serial.print(gz, 1); Serial.println(" degrees/sec"); 
+    Serial.print("X-gyro rate: "); Serial.print(gyrox, 1); Serial.print(" degrees/sec "); 
+    Serial.print("Y-gyro rate: "); Serial.print(gyroy, 1); Serial.print(" degrees/sec "); 
+    Serial.print("Z-gyro rate: "); Serial.print(gyroz, 1); Serial.println(" degrees/sec"); 
     
    // Print temperature in degrees Centigrade      
     Serial.print("Temperature is ");  Serial.print(temperature, 2);  Serial.println(" degrees C"); // Print T values to tenths of s degree C
@@ -323,9 +323,9 @@ void loop()
     display.setCursor(48, 16); display.print((int16_t)(1000*az)); 
     display.setCursor(72, 16); display.print("mg");
     
-    display.setCursor(0,  24); display.print((int16_t)(gx)); 
-    display.setCursor(24, 24); display.print((int16_t)(gy)); 
-    display.setCursor(48, 24); display.print((int16_t)(gz)); 
+    display.setCursor(0,  24); display.print((int16_t)(gyrox)); 
+    display.setCursor(24, 24); display.print((int16_t)(gyroy)); 
+    display.setCursor(48, 24); display.print((int16_t)(gyroz)); 
     display.setCursor(66, 24); display.print("o/s");     
    
     display.setCursor(0,  40); display.print("Gyro T  "); 
